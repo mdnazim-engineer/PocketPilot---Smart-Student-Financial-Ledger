@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="hi" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PocketPilot - Smart Student Financial Ledger</title>
+    
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.04)',
+                        'glow': '0 0 20px 0 rgba(99, 102, 241, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- html2pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-300 antialiased font-sans">
+
+    <div class="min-h-screen flex flex-col lg:flex-row">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-full lg:w-72 bg-white dark:bg-slate-900 border-b lg:border-b-0 lg:border-r border-slate-200/80 dark:border-slate-800/80 flex-shrink-0 flex flex-col justify-between z-30 shadow-premium">
+            <div>
+                <!-- Brand Logo Banner with logo_3.png reference -->
+                <div class="p-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/50">
+                    <div class="flex items-center gap-3">
+                        <!-- Custom Logo Image (logo_3.png) with smart fallback -->
+                        <div class="w-500 h-00 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-50 dark:bg-slate-800/50 p-1">
+                            <img src="logo.png" alt="PocketPilot Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="object-contain max-h-full max-w-full" />
+                            <div style="display:none;" class="w-full h-full bg-gradient-to-tr from-indigo-600 to-indigo-700 text-white rounded-xl flex items-center justify-center text-xs font-black shadow-lg shadow-indigo-500/20">PP</div>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">PocketPilot</h1>
+                            <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-extrabold uppercase tracking-widest block mt-0.5">EXPENSE MANAGEMENT SYSTEM</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Theme Toggle Controller -->
+                    <button id="themeToggle" class="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 rounded-xl transition-all" aria-label="Toggle Theme">
+                        <i data-lucide="sun" class="w-4.5 h-4.5 text-amber-500 block dark:hidden"></i>
+                        <i data-lucide="moon" class="w-4.5 h-4.5 text-indigo-400 hidden dark:block"></i>
+                    </button>
+                </div>
+
+                <!-- Navigation menu blocks -->
+                <nav class="p-4 space-y-1.5">
+                    <a href="#overview" class="nav-item active flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Overview Dashboard
+                    </a>
+                    <a href="#add-transaction-section" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i> Add Transactions
+                    </a>
+                    <a href="#analytics-section" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <i data-lucide="pie-chart" class="w-5 h-5"></i> Spending Analytics
+                    </a>
+                    <a href="#savings-section" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <i data-lucide="target" class="w-5 h-5"></i> Savings Goals
+                    </a>
+                    <a href="#history-section" class="nav-item flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <i data-lucide="history" class="w-5 h-5"></i> Ledger History
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- MAIN LAYOUT CONTENT WRAPPER -->
+        <main class="flex-1 overflow-x-hidden p-4 md:p-8 space-y-6">
+            
+            <header id="overview" class="flex flex-col md:flex-row md:items-center justify-between gap-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800/80 shadow-premium">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">PocketPilot 👋</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Manage your budget, expenses, savings, and monthly financial activities in one place.</p>
+                </div>
+                
+                <!-- Controls -->
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <select id="monthPicker" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-2.5 px-4 rounded-xl text-xs font-extrabold outline-none text-slate-700 dark:text-slate-200 transition-all cursor-pointer">
+                        <!-- Filled by JS -->
+                    </select>
+                    
+                    <button onclick="window.exportCSV()" class="p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 hover:ring-2 hover:ring-indigo-500/10 text-xs font-bold transition-all flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
+                        <i data-lucide="download" class="w-4 h-4"></i> CSV
+                    </button>
+                    
+                    <button onclick="window.exportPDF()" class="p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 hover:ring-2 hover:ring-indigo-500/10 text-xs font-bold transition-all flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> PDF
+                    </button>
+                    
+                    <button onclick="window.triggerConfirmReset()" class="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 dark:text-rose-400 border border-rose-200/50 dark:border-rose-900/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> Reset Data
+                    </button>
+                </div>
+            </header>
+
+            <!-- WARNING ALERTS SYSTEM -->
+            <div id="alertBox" class="hidden animate-slide-down">
+                <!-- Javascript injects danger alerts inside -->
+            </div>
+
+            <!-- DASHBOARD STAT CARDS -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Monthly Budget Card (Auto-calculated from Income Entry) -->
+                <div class="glass-card p-6 rounded-3xl relative overflow-hidden group premium-hover">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center transition-all group-hover:scale-110">
+                        <i data-lucide="wallet" class="w-6 h-6 text-indigo-500"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest block">MONTHLY BUDGET (INCOME)</span>
+                        <h3 class="text-3xl font-black text-slate-900 dark:text-white mt-1.5">₹<span id="displayBudget">0</span></h3>
+                    </div>
+                    
+                    <div class="mt-4 flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
+                        <i data-lucide="info" class="w-4 h-4 text-indigo-500"></i> Auto-updated from Income Entries
+                    </div>
+                </div>
+
+                <!-- Total Expenses Card -->
+                <div class="glass-card p-6 rounded-3xl relative overflow-hidden group premium-hover">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center transition-all group-hover:scale-110">
+                        <i data-lucide="trending-up" class="w-6 h-6 text-rose-500"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest block">TOTAL SPEND</span>
+                        <h3 class="text-3xl font-black text-rose-600 dark:text-rose-400 mt-1.5">₹<span id="displayExpenses">0</span></h3>
+                    </div>
+                    <div class="mt-4 flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
+                        <i data-lucide="calendar" class="w-4 h-4"></i> Fixed + Daily Spend in selected month
+                    </div>
+                </div>
+
+                <!-- Remaining Balance Card -->
+                <div class="glass-card p-6 rounded-3xl relative overflow-hidden group premium-hover">
+                    <div id="balanceBg" class="absolute -right-4 -top-4 w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center transition-all group-hover:scale-110">
+                        <i id="balanceIcon" data-lucide="badge-dollar-sign" class="w-6 h-6 text-emerald-500"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest block">REMAINING BALANCE</span>
+                        <h3 class="text-3xl font-black text-slate-900 dark:text-white mt-1.5">₹<span id="displayBalance">0</span></h3>
+                    </div>
+                    <div class="mt-4">
+                        <div class="w-full bg-slate-100 dark:bg-slate-850 rounded-full h-2 overflow-hidden">
+                            <div id="balanceProgress" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Count Card -->
+                <div class="glass-card p-6 rounded-3xl relative overflow-hidden group premium-hover">
+                    <div class="absolute -right-4 -top-4 w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center transition-all group-hover:scale-110">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6 text-amber-500"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest block">TOTAL TRANSACTIONS</span>
+                        <h3 class="text-3xl font-black text-slate-900 dark:text-white mt-1.5"><span id="displayCount">0</span></h3>
+                    </div>
+                    <div class="mt-4 flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
+                        <i data-lucide="tag" class="w-4 h-4"></i> Count of logged list
+                    </div>
+                </div>
+
+            </section>
+
+            <div id="add-transaction-section" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Form Input Panel -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- Form 1: Income Setup -->
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium">
+                        <div class="flex items-center gap-3.5 mb-5">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                                <i data-lucide="arrow-down-left" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Income Entry</h3>
+                                <p class="text-xs text-slate-400">Manage your monthly income and earnings.</p>
+                            </div>
+                        </div>
+
+                        <form id="incomeForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">INCOME AMOUNT (₹)</label>
+                                <input type="number" id="incomeAmount" placeholder="Ex: 10000" required
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all focus:ring-2 focus:ring-emerald-500/20">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">SOURCE</label>
+                                <input type="text" id="incomeSource" placeholder="Enter your income source" required
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all focus:ring-2 focus:ring-emerald-500/20">
+                            </div>
+                            <div class="md:col-span-2">
+                                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i> Save Income
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Form 2: Fixed Monthly Bills (Rent, WiFi, Electricity, Water) -->
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium">
+                        <div class="flex items-center gap-3.5 mb-5">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Fixed Monthly Bills</h3>
+                                <p class="text-xs text-slate-400">Ye woh expenses hain jo har mahine repeat hote hain.</p>
+                            </div>
+                        </div>
+
+                        <form id="fixedBillsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Room Rent (₹)</label>
+                                <input type="number" id="fixedRent" placeholder="0"
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Electricity Bill (₹)</label>
+                                <input type="number" id="fixedElectricity" placeholder="0"
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Net / Wi-Fi Bill (₹)</label>
+                                <input type="number" id="fixedWiFi" placeholder="0"
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Pani / Other Bills (₹)</label>
+                                <input type="number" id="fixedWater" placeholder="0"
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all">
+                            </div>
+                            <div class="md:col-span-2">
+                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                                    <i data-lucide="shield-check" class="w-4 h-4"></i> Save Monthly Fixed Bills
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Form 3: Daily Expense Form -->
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium">
+                        <div class="flex items-center gap-3.5 mb-5">
+                            <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+                                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Daily Expenses</h3>
+                                <p class="text-xs text-slate-400">Apne daily aur miscellaneous expenses ko yahan record karein.</p>
+                            </div>
+                        </div>
+
+                        <form id="dailyExpenseForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Item Name</label>
+                                <input type="text" id="dailyTitle" placeholder="Enter your item name" required
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Amount (₹)</label>
+                                <input type="number" id="dailyAmount" placeholder="Ex: 50" required
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Transaction Date</label>
+                                <input type="date" id="dailyDate" required
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Category</label>
+                                <select id="dailyCategory" required
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all cursor-pointer">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="flex flex-col justify-end">
+                                <button type="button" id="customCategoryTrigger" class="flex items-center justify-center gap-2 px-4 py-3.5 border border-dashed border-indigo-200 hover:border-indigo-500 dark:border-indigo-800 dark:hover:border-indigo-500 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/20 rounded-xl text-xs font-bold transition-all">
+                                    <i data-lucide="tags" class="w-4 h-4"></i> Custom Category
+                                </button>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Optional Notes</label>
+                                <input type="text" id="dailyNotes" placeholder="Ex: Cash diya, Shared with roommate..."
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl outline-none text-sm font-semibold text-slate-800 dark:text-white transition-all">
+                            </div>
+                            <div class="md:col-span-2 flex items-center gap-3">
+                                <button type="submit" id="submitDailyBtn" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                                    <i data-lucide="check" class="w-4 h-4"></i> Save Daily Expense
+                                </button>
+                                <button type="button" id="cancelEditBtn" class="hidden px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl transition-all">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- Savings Goal & Insights Columns -->
+                <div id="savings-section" class="lg:col-span-5 space-y-6">
+                    
+                    <!-- Goal Tracker Widget -->
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium flex flex-col justify-between min-h-[200px]">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                                    <i data-lucide="target" class="w-5.5 h-5.5"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-800 dark:text-white" id="goalTitle">New Goal</h3>
+                                    <p class="text-xs text-slate-400">Target: <span id="goalAmountText">₹0</span></p>
+                                </div>
+                            </div>
+                            <button id="editGoalBtn" class="p-2 text-slate-400 hover:text-indigo-500 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <!-- Progress indicators -->
+                        <div class="my-6">
+                            <div class="flex justify-between items-center text-xs font-bold mb-2 text-slate-500">
+                                <span>Saved: ₹<span id="currentSavingsText">0</span></span>
+                                <span id="goalPercentText" class="text-amber-600 dark:text-amber-400">0%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3.5 overflow-hidden">
+                                <div id="goalProgressBar" class="bg-gradient-to-r from-amber-400 to-amber-500 h-3.5 rounded-full transition-all duration-700" style="width: 0%"></div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 font-semibold mt-2.5 text-right">
+                                Remaining Target: ₹<span id="remainingSavingsText">0</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Smart Spending Insights -->
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium">
+                        <h4 class="text-xs font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4 flex items-center gap-1.5">
+                            <i data-lucide="lightbulb" class="w-4 h-4 text-indigo-500"></i> SMART SPENDING INSIGHTS
+                        </h4>
+                        <div id="insightsBox" class="space-y-3">
+                            <!-- Injected with insights templates -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ANALYTICS CHARTS SECTION -->
+            <section id="analytics-section" class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Spending Analytics</h3>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-medium">Category-wise spending analysis.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                    <!-- Left: Large Circular breakdown of spent amount -->
+                    <div class="md:col-span-5 flex justify-center py-4">
+                        <div class="relative w-64 h-64 flex items-center justify-center">
+                            <canvas id="spendingDoughnutChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right: List legend with category percentage share and total spent on it -->
+                    <div class="md:col-span-7 space-y-4">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Category Share List</h4>
+                        <div id="analyticsLegendGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2">
+                            <!-- Injected dynamically with category progress panels -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HISTORY TABLES SECTION -->
+            <section id="history-section" class="space-y-6">
+
+                <!-- 1. Income History Ledger -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+                        <h4 class="text-base font-bold text-slate-850 dark:text-white flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            Income History
+                        </h4>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <th class="px-6 py-4">Source</th>
+                                    <th class="px-6 py-4 text-right">Amount</th>
+                                    <th class="px-6 py-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomeTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                                <!-- JS Injects -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="incomeEmpty" class="hidden p-8 text-center text-slate-400">No income entries found.</div>
+                </div>
+
+                <!-- 2. Fixed Bills Status History -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+                        <h4 class="text-base font-bold text-slate-850 dark:text-white flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
+                            Monthly Fixed Bills History
+                        </h4>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <th class="px-6 py-4">Month</th>
+                                    <th class="px-6 py-4">Rent</th>
+                                    <th class="px-6 py-4">Electricity</th>
+                                    <th class="px-6 py-4">Net / Wi-Fi</th>
+                                    <th class="px-6 py-4">Other Bill</th>
+                                    <th class="px-6 py-4 text-right">Total Fixed</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fixedTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                                <!-- JS Injects -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="fixedEmpty" class="hidden p-8 text-center text-slate-400">No fixed bill entries logged.</div>
+                </div>
+
+                <!-- 3. Daily Expenses History Ledger -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+                        <h4 class="text-base font-bold text-slate-850 dark:text-white flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            Daily Expenses History
+                        </h4>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <th class="px-6 py-4">Date</th>
+                                    <th class="px-6 py-4">Details</th>
+                                    <th class="px-6 py-4">Category</th>
+                                    <th class="px-6 py-4 text-right">Amount</th>
+                                    <th class="px-6 py-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dailyTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                                <!-- JS Injects -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="dailyEmpty" class="hidden p-8 text-center text-slate-400">No daily expense logs found.</div>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- EDIT SAVINGS GOAL POPUP -->
+    <div id="goalModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl w-full max-w-sm border border-slate-100 dark:border-slate-800 shadow-2xl m-4 transform scale-95 transition-all">
+            <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-white">Configure Savings Goal</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[11px] font-extrabold text-slate-400 block mb-1">Goal Name</label>
+                    <input type="text" id="modalGoalTitle" placeholder="Laptop, Bike, Mobile..." class="w-full p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-xl outline-none font-semibold text-sm text-slate-800 dark:text-white">
+                </div>
+                <div>
+                    <label class="text-[11px] font-extrabold text-slate-400 block mb-1">Target Amount (₹)</label>
+                    <input type="number" id="modalGoalTarget" placeholder="Ex: 50000" class="w-full p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-xl outline-none font-bold text-sm text-slate-800 dark:text-white">
+                </div>
+                <div>
+                    <label class="text-[11px] font-extrabold text-slate-400 block mb-1">Current Saved Amount (₹)</label>
+                    <input type="number" id="modalGoalCurrent" placeholder="Ex: 10000" class="w-full p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-xl outline-none font-bold text-sm text-slate-800 dark:text-white">
+                </div>
+            </div>
+            <div class="flex items-center gap-2 mt-6">
+                <button onclick="window.saveSavingsGoal()" class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 text-xs">Update Goal</button>
+                <button onclick="window.closeGoalModal()" class="px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 text-xs">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM CATEGORY ADD POPUP -->
+    <div id="categoryModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl w-full max-w-sm border border-slate-100 dark:border-slate-800 shadow-2xl m-4 transform scale-95 transition-all">
+            <h3 class="text-lg font-bold mb-1 text-slate-800 dark:text-white">Custom Category</h3>
+            <p class="text-xs text-slate-400 mb-4">Create custom tags for transactions</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[11px] font-extrabold text-slate-400 block mb-1">Category Name</label>
+                    <input type="text" id="modalCategoryName" placeholder="Ex: College Trip, Exam Fees..." class="w-full p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-xl outline-none font-semibold text-sm text-slate-800 dark:text-white">
+                </div>
+                <div>
+                    <label class="text-[11px] font-extrabold text-slate-400 block mb-1">Category Icon / Emoji</label>
+                    <input type="text" id="modalCategoryIcon" placeholder="Ex: ✈️, 💻" class="w-full p-3 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-xl outline-none text-center font-bold text-lg text-slate-800 dark:text-white">
+                </div>
+            </div>
+            <div class="flex items-center gap-2 mt-6">
+                <button onclick="window.saveCustomCategory()" class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 text-xs">Save Category</button>
+                <button onclick="window.closeCategoryModal()" class="px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 text-xs">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRM DIALOG MODAL -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl w-full max-w-sm border border-slate-100 dark:border-slate-800 shadow-2xl m-4 transform scale-95 transition-all">
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold mb-1 text-slate-800 dark:text-white" id="confirmTitle">Confirm Action</h3>
+            <p class="text-xs text-slate-400 mb-5" id="confirmMessage">Are you sure you want to perform this action?</p>
+            <div class="flex items-center gap-2.5">
+                <button id="confirmYesBtn" class="flex-1 bg-rose-600 text-white font-bold py-3 rounded-xl hover:bg-rose-700 text-xs">Confirm</button>
+                <button id="confirmNoBtn" class="px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 text-xs">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL TOAST FLOATING PANEL -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 dark:bg-slate-800/95 text-white dark:text-slate-100 px-6 py-3 rounded-2xl shadow-xl border border-white/10 opacity-0 pointer-events-none transition-all duration-300 z-50 text-xs font-bold flex items-center gap-2">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toastMessage">Success</span>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>

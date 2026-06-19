@@ -2,13 +2,14 @@ let state = {
             incomes: [],
             fixedBills: {}, // Keyed by month "YYYY-MM"
             dailyExpenses: [],
+            loans: [],      // New Udhaar records
             categories: [
                 { id: 'food', name: 'Mess', icon: '🍔', color: '#f97316' },
                 { id: 'snacks', name: 'Chai & Snacks', icon: '☕', color: '#84cc16' },
                 { id: 'travel', name: 'Travel & Auto', icon: '🚌', color: '#10b981' },
                 { id: 'mobile', name: 'Fast Food', icon: '🍔', color: '#ec4899' },
                 { id: 'books', name: 'Books & Stationary', icon: '📚', color: '#6366f1' },
-                { id: 'laundry', name: 'Laundry / Dhobi', icon: '🧺', color: '#a855f7' },
+                { id: 'laundry', name: 'Laundry', icon: '🧺', color: '#a855f7' },
                 { id: 'medical', name: 'Medical', icon: '💊', color: '#ef4444' },
                 { id: 'shopping', name: 'Shopping', icon: '🛍️', color: '#d946ef' },
                 { id: 'movies', name: 'Masti & Movies', icon: '🎬', color: '#f43f5e' },
@@ -25,10 +26,7 @@ let state = {
             editDailyId: null
         };
 
-        // Cache Handler Callbacks
         let activeConfirmCallback = null;
-
-        // Chart definitions
         let spendingDoughnutChart = null;
 
         function saveToLocalStorage() {
@@ -41,6 +39,9 @@ let state = {
                 try {
                     const parsed = JSON.parse(savedState);
                     state = { ...state, ...parsed };
+                    if (!state.loans) {
+                        state.loans = []; // Backwards compatibility
+                    }
                 } catch(e) {
                     console.error("Localstorage recovery failed, using standard config", e);
                 }
@@ -55,6 +56,7 @@ let state = {
             setupMonthFilter();
             
             document.getElementById('dailyDate').valueAsDate = new Date();
+            document.getElementById('udhaarDate').valueAsDate = new Date();
             
             syncUI();
             lucide.createIcons();
@@ -82,7 +84,7 @@ let state = {
                     state.theme = 'dark';
                 }
                 saveToLocalStorage();
-                syncUI(); // Re-render charts
+                syncUI(); // Re-render charts with correct theme label colors
             });
         }
 
@@ -118,24 +120,22 @@ let state = {
         }
 
         // --------------------------------------------------
-        // CHART RENDERING ENGINE
+        // CHART RENDERING ENGINE (EXCLUDES LOANS)
         // --------------------------------------------------
         function drawCharts(filteredDaily, activeFixed) {
             const isDark = document.documentElement.classList.contains('dark');
 
-            // Aggregate all spent amount under correct categories
+            // Aggregate spent amount under categories
             const spentAggregate = {};
             state.categories.forEach(cat => {
                 spentAggregate[cat.id] = 0;
             });
 
-            // Rent, electricity, wifi and water are categorized dynamically
             let rentAmount = parseFloat(activeFixed.rent) || 0;
             let elecAmount = parseFloat(activeFixed.electricity) || 0;
             let wifiAmount = parseFloat(activeFixed.wifi) || 0;
             let waterAmount = parseFloat(activeFixed.water) || 0;
 
-            // 2. Add Daily Expenses
             filteredDaily.forEach(exp => {
                 if (spentAggregate[exp.category] !== undefined) {
                     spentAggregate[exp.category] += parseFloat(exp.amount) || 0;
@@ -144,10 +144,9 @@ let state = {
                 }
             });
 
-            // Calculate total overall spent to compute percentages
+            // Note: LOANS are completely excluded from charts and totals
             const totalSpentCombined = Object.values(spentAggregate).reduce((sum, val) => sum + val) + rentAmount + elecAmount + wifiAmount + waterAmount;
 
-            // Filter out categories with zero spending for chart display
             const chartLabels = [];
             const chartData = [];
             const chartColors = [];
@@ -213,7 +212,6 @@ let state = {
                     }
                 });
             } else {
-                // Draw a simple blank/gray doughnut if no data
                 spendingDoughnutChart = new Chart(ctxDoughnut, {
                     type: 'doughnut',
                     data: {
@@ -285,7 +283,7 @@ let state = {
         }
 
         // --------------------------------------------------
-        // SYNC USER INTERFACE & STATE Math
+        // SYNC USER INTERFACE & STATE MATHEMATICS
         // --------------------------------------------------
         function syncUI() {
             const monthRange = getSelectedMonthRange();
@@ -299,6 +297,10 @@ let state = {
                 const d = new Date(exp.date);
                 return d.getFullYear() === monthRange.year && (d.getMonth() + 1) === monthRange.month;
             });
+            const filteredLoans = state.loans.filter(loan => {
+                const d = new Date(loan.date);
+                return d.getFullYear() === monthRange.year && (d.getMonth() + 1) === monthRange.month;
+            });
 
             // 2. Mathematical sums
             const activeFixed = state.fixedBills[activeMonthStr] || { rent: 0, electricity: 0, wifi: 0, water: 0 };
@@ -308,14 +310,18 @@ let state = {
                                      (parseFloat(activeFixed.water) || 0);
 
             const totalDailySpent = filteredDaily.reduce((sum, exp) => sum + exp.amount, 0);
+            
+            // NOTE: Loan amounts are absolutely NOT included in overallExpensesSum or deducted anywhere!
             const overallExpensesSum = totalFixedSpent + totalDailySpent;
 
-            // Calculate live budget limit as cumulative sum of current month's incomes
+            // Calculate live budget limit
             const totalIncomeSum = filteredIncomes.reduce((sum, inc) => sum + inc.amount, 0);
             const liveBudget = totalIncomeSum;
 
-            // Remaining Balance relative to Auto-Calculated Income Budget
+            // Remaining Balance
             const balanceLeft = liveBudget - overallExpensesSum;
+            
+            // Total Transactions Count
             const transactionsCount = filteredIncomes.length + (state.fixedBills[activeMonthStr] ? 1 : 0) + filteredDaily.length;
 
             // Render stats cards
@@ -346,27 +352,27 @@ let state = {
                 balanceIcon.className = 'w-6 h-6 text-emerald-500';
             }
 
-            // Warnings, Charts and Tables updates
+            // Warnings, Charts, Tables and Insights update
             checkBudgetWarnings(overallExpensesSum, liveBudget);
             renderSavingsGoal();
             renderInsights(filteredDaily, overallExpensesSum, totalFixedSpent, liveBudget);
             drawCharts(filteredDaily, activeFixed);
             
-            // Draw tables
+            // Draw all tables
             renderIncomeTable(filteredIncomes);
             renderFixedTable(activeMonthStr, activeFixed, totalFixedSpent);
             renderDailyTable(filteredDaily);
+            renderUdhaarTable(filteredLoans);
         }
 
         // --------------------------------------------------
-        // SYSTEM WARNINGS (Modified to track live budget)
+        // SYSTEM WARNINGS
         // --------------------------------------------------
         function checkBudgetWarnings(spent, liveBudget) {
             const alertBox = document.getElementById('alertBox');
             const spentPercent = liveBudget > 0 ? (spent / liveBudget) * 100 : 0;
             let html = '';
 
-            // Warn only if liveBudget is set (> 0)
             if (liveBudget > 0) {
                 if (spentPercent >= 100) {
                     html = `
@@ -399,7 +405,7 @@ let state = {
         }
 
         // --------------------------------------------------
-        // INSIGHTS SYSTEM (Modified to use live budget)
+        // INSIGHTS SYSTEM
         // --------------------------------------------------
         function renderInsights(dailyList, overallSpent, fixedSpent, liveBudget) {
             const container = document.getElementById('insightsBox');
@@ -410,7 +416,6 @@ let state = {
 
             let insightsHtml = '';
 
-            // 1. Live budget utilization ratio
             const spentPercent = liveBudget > 0 ? ((overallSpent / liveBudget) * 100).toFixed(0) : 0;
             if (liveBudget > 0) {
                 insightsHtml += `
@@ -430,7 +435,6 @@ let state = {
                     </div>`;
             }
 
-            // 2. Highest Category identification
             const catMap = {};
             dailyList.forEach(exp => {
                 catMap[exp.category] = (catMap[exp.category] || 0) + exp.amount;
@@ -459,7 +463,6 @@ let state = {
                     </div>`;
             }
 
-            // 3. Peak single item
             let peakSingle = { amount: 0, title: '' };
             dailyList.forEach(exp => {
                 if (exp.amount > peakSingle.amount) {
@@ -567,8 +570,6 @@ let state = {
         // --------------------------------------------------
         // ACTION HANDLERS (Add / Delete / Update)
         // --------------------------------------------------
-        // Note: Manual budget updater function is deprecated and removed as budget is calculated automatically from Incomes.
-
         // Form 1: Save Income
         document.getElementById('incomeForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -651,6 +652,32 @@ let state = {
             syncUI();
         });
 
+        // Form 4: Money Lent (Udhaar Tracker) Form Submission
+        document.getElementById('udhaarForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const person = document.getElementById('udhaarPerson').value.trim();
+            const amount = parseFloat(document.getElementById('udhaarAmount').value);
+            const date = document.getElementById('udhaarDate').value;
+            const notes = document.getElementById('udhaarNotes').value.trim();
+
+            if (!person || isNaN(amount) || !date) return;
+
+            state.loans.push({
+                id: Date.now().toString(),
+                person,
+                amount,
+                date,
+                notes,
+                settled: false // Default status is Pending
+            });
+
+            saveToLocalStorage();
+            e.target.reset();
+            document.getElementById('udhaarDate').valueAsDate = new Date();
+            syncUI();
+            showToastNotification("Udhaar record saved successfully!");
+        });
+
         document.getElementById('cancelEditBtn').addEventListener('click', () => {
             state.editDailyId = null;
             document.getElementById('dailyExpenseForm').reset();
@@ -701,6 +728,33 @@ let state = {
                     saveToLocalStorage();
                     syncUI();
                     showToastNotification("Daily transaction record deleted.");
+                }
+            );
+        }
+
+        // Toggle Udhaar (Settled / Pending)
+        window.toggleUdhaarStatus = function(id) {
+            state.loans = state.loans.map(loan => {
+                if (loan.id === id) {
+                    return { ...loan, settled: !loan.settled };
+                }
+                return loan;
+            });
+            saveToLocalStorage();
+            syncUI();
+            showToastNotification("Udhaar payment status updated!");
+        }
+
+        // Delete Udhaar record
+        window.deleteUdhaar = function(id) {
+            triggerCustomConfirm(
+                "Delete Udhaar Record",
+                "Kya aap is Udhaar record ko permanently delete karna chahte hain?",
+                () => {
+                    state.loans = state.loans.filter(loan => loan.id !== id);
+                    saveToLocalStorage();
+                    syncUI();
+                    showToastNotification("Udhaar ledger record removed.");
                 }
             );
         }
@@ -809,6 +863,53 @@ let state = {
             lucide.createIcons();
         }
 
+        // Render Money Lent (Udhaar Ledger)
+        function renderUdhaarTable(loanList) {
+            const tbody = document.getElementById('udhaarTableBody');
+            tbody.innerHTML = '';
+
+            if (loanList.length === 0) {
+                document.getElementById('udhaarEmpty').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('udhaarEmpty').classList.add('hidden');
+
+            loanList.forEach(loan => {
+                const dateObj = new Date(loan.date);
+                const formattedDate = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                // Cross text effect if money is returned/settled
+                const crossedStyle = loan.settled ? 'line-through text-slate-400 dark:text-slate-500 opacity-50' : '';
+
+                const statusBadge = loan.settled 
+                    ? `<button onclick="window.toggleUdhaarStatus('${loan.id}')" class="px-3 py-1.5 text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl transition-all flex items-center gap-1.5 border border-emerald-500/20" title="Click to Mark Pending">
+                        <i data-lucide="check-square" class="w-4 h-4"></i> Paid (Returned)
+                       </button>` 
+                    : `<button onclick="window.toggleUdhaarStatus('${loan.id}')" class="px-3 py-1.5 text-xs font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-500 dark:text-rose-400 rounded-xl transition-all flex items-center gap-1.5 border border-rose-500/20" title="Click to Mark Paid">
+                        <i data-lucide="square" class="w-4 h-4"></i> Unpaid (Pending)
+                       </button>`;
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors';
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-bold text-slate-400 dark:text-slate-500 text-xs">${formattedDate}</td>
+                    <td class="px-6 py-4">
+                        <p class="font-extrabold text-slate-850 dark:text-slate-200 leading-tight ${crossedStyle}">${loan.person}</p>
+                        ${loan.notes ? `<p class="text-[11px] text-slate-400 font-medium mt-1 italic ${crossedStyle}">${loan.notes}</p>` : ''}
+                    </td>
+                    <td class="px-6 py-4 font-black text-slate-900 dark:text-white ${crossedStyle}">₹${loan.amount.toLocaleString('en-IN')}</td>
+                    <td class="px-6 py-4">${statusBadge}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="window.deleteUdhaar('${loan.id}')" class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-all" title="Delete">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            lucide.createIcons();
+        }
+
         // --------------------------------------------------
         // CUSTOM MODALS
         // --------------------------------------------------
@@ -846,6 +947,7 @@ let state = {
                     state.incomes = [];
                     state.fixedBills = {};
                     state.dailyExpenses = [];
+                    state.loans = [];
                     state.savingsGoal = { title: 'New Goal', target: 0, current: 0 };
                     saveToLocalStorage();
                     syncUI();

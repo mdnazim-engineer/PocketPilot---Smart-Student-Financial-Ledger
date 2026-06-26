@@ -2,20 +2,20 @@ let state = {
             incomes: [],
             fixedBills: {}, // Keyed by month "YYYY-MM"
             dailyExpenses: [],
-            loans: [],      // New Udhaar records
+            loans: [],      // Money Lent (Udhaar) records
             categories: [
-                { id: 'food', name: 'Mess', icon: '🍔', color: '#f97316' },
+                { id: 'food', name: 'Mess & Food', icon: '🍔', color: '#f97316' },
                 { id: 'snacks', name: 'Chai & Snacks', icon: '☕', color: '#84cc16' },
                 { id: 'travel', name: 'Travel & Auto', icon: '🚌', color: '#10b981' },
-                { id: 'mobile', name: 'Fast Food', icon: '🍔', color: '#ec4899' },
+                { id: 'mobile', name: 'Recharges', icon: '📱', color: '#ec4899' },
                 { id: 'books', name: 'Books & Stationary', icon: '📚', color: '#6366f1' },
-                { id: 'laundry', name: 'Laundry', icon: '🧺', color: '#a855f7' },
-                { id: 'medical', name: 'Medical', icon: '💊', color: '#ef4444' },
+                { id: 'laundry', name: 'Laundry / Dhobi', icon: '🧺', color: '#a855f7' },
+                { id: 'medical', name: 'Medical / Meds', icon: '💊', color: '#ef4444' },
                 { id: 'shopping', name: 'Shopping', icon: '🛍️', color: '#d946ef' },
                 { id: 'movies', name: 'Masti & Movies', icon: '🎬', color: '#f43f5e' },
                 { id: 'gym', name: 'Gym & Fitness', icon: '🏋️‍♂️', color: '#06b6d4' },
                 { id: 'personal', name: 'Personal Care', icon: '💈', color: '#3b82f6' },
-                { id: 'others', name: 'other', icon: '📦', color: '#64748b' }
+                { id: 'others', name: 'Anya / Misc', icon: '📦', color: '#64748b' }
             ],
             savingsGoal: {
                 title: 'New Goal',
@@ -258,7 +258,7 @@ let state = {
             });
 
             if (chartData.length === 0) {
-                legendGrid.innerHTML = `<p class="text-xs text-slate-400 italic col-span-2">Kharchon ki circular report yahan generate hogi.</p>`;
+                legendGrid.innerHTML = '';
             }
         }
 
@@ -760,7 +760,7 @@ let state = {
         }
 
         // --------------------------------------------------
-        // TABLE RENDERERS
+        // TABLE RENDERERS (MOBILE OPTIMIZED AND SCALED DOWN)
         // --------------------------------------------------
         function renderIncomeTable(incomeList) {
             const tbody = document.getElementById('incomeTableBody');
@@ -772,6 +772,7 @@ let state = {
             }
             document.getElementById('incomeEmpty').classList.add('hidden');
 
+            // Render Rows
             incomeList.forEach(inc => {
                 const dateObj = new Date(inc.date);
                 const formattedDate = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -779,19 +780,31 @@ let state = {
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors';
                 row.innerHTML = `
-                    <td class="px-6 py-4">
-                        <p class="font-extrabold text-slate-850 dark:text-slate-200">${inc.source}</p>
-                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold">${formattedDate}</span>
+                    <td class="px-2 py-3 sm:px-6 sm:py-4">
+                        <p class="font-extrabold text-slate-850 dark:text-slate-200 text-xs sm:text-sm">${inc.source}</p>
+                        <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold">${formattedDate}</span>
                     </td>
-                    <td class="px-6 py-4 text-right font-black text-emerald-600 dark:text-emerald-400">₹${inc.amount.toLocaleString('en-IN')}</td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="window.deleteIncome('${inc.id}')" class="p-2 text-slate-400 hover:text-rose-500 rounded-xl transition-all" title="Delete">
+                    <td class="px-2 py-3 sm:px-6 sm:py-4 text-right font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">₹${inc.amount.toLocaleString('en-IN')}</td>
+                    <td class="px-2 py-3 sm:px-6 sm:py-4 text-right">
+                        <button onclick="window.deleteIncome('${inc.id}')" class="p-1 sm:p-2 text-slate-400 hover:text-rose-500 rounded-xl transition-all" title="Delete">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
+
+            // Calculate & Append Total Summary Row
+            const totalIncomeSum = incomeList.reduce((sum, inc) => sum + inc.amount, 0);
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'bg-slate-100/50 dark:bg-slate-800/40 font-bold border-t border-slate-200 dark:border-slate-700';
+            totalRow.innerHTML = `
+                <td class="px-2 py-3 sm:px-6 sm:py-4 text-xs sm:text-sm font-black text-slate-850 dark:text-slate-200">Total Income</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 text-right font-black text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm">₹${totalIncomeSum.toLocaleString('en-IN')}</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4"></td>
+            `;
+            tbody.appendChild(totalRow);
+
             lucide.createIcons();
         }
 
@@ -808,14 +821,24 @@ let state = {
             const row = document.createElement('tr');
             row.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors';
             row.innerHTML = `
-                <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-200">${month}</td>
-                <td class="px-6 py-4 font-bold text-slate-500 dark:text-slate-400">₹${(bills.rent || 0).toLocaleString('en-IN')}</td>
-                <td class="px-6 py-4 font-bold text-slate-500 dark:text-slate-400">₹${(bills.electricity || 0).toLocaleString('en-IN')}</td>
-                <td class="px-6 py-4 font-bold text-slate-500 dark:text-slate-400">₹${(bills.wifi || 0).toLocaleString('en-IN')}</td>
-                <td class="px-6 py-4 font-bold text-slate-500 dark:text-slate-400">₹${(bills.water || 0).toLocaleString('en-IN')}</td>
-                <td class="px-6 py-4 text-right font-black text-rose-600 dark:text-rose-400">₹${total.toLocaleString('en-IN')}</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 font-bold text-slate-700 dark:text-slate-200 text-xs sm:text-sm">${month}</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 font-semibold text-slate-500 dark:text-slate-400 text-xs sm:text-sm">₹${(bills.rent || 0).toLocaleString('en-IN')}</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 font-semibold text-slate-500 dark:text-slate-400 text-xs sm:text-sm">₹${(bills.electricity || 0).toLocaleString('en-IN')}</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 font-semibold text-slate-500 dark:text-slate-400 text-xs sm:text-sm">₹${(bills.wifi || 0).toLocaleString('en-IN')}</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 font-semibold text-slate-500 dark:text-slate-400 text-xs sm:text-sm">₹${(bills.water || 0).toLocaleString('en-IN')}</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 text-right font-black text-rose-600 dark:text-rose-400 text-xs sm:text-sm">₹${total.toLocaleString('en-IN')}</td>
             `;
             tbody.appendChild(row);
+
+            // Append Total Summary Row
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'bg-slate-100/50 dark:bg-slate-800/40 font-bold border-t border-slate-200 dark:border-slate-700';
+            totalRow.innerHTML = `
+                <td class="px-2 py-3 sm:px-6 sm:py-4 text-xs sm:text-sm font-black text-slate-850 dark:text-slate-200">Total Fixed Bills</td>
+                <td colspan="4" class="px-2 py-3 sm:px-6 sm:py-4 text-xs sm:text-sm text-slate-400 font-medium">All Fixed Combined</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 text-right font-black text-rose-600 dark:text-rose-400 text-xs sm:text-sm">₹${total.toLocaleString('en-IN')}</td>
+            `;
+            tbody.appendChild(totalRow);
         }
 
         function renderDailyTable(dailyList) {
@@ -828,6 +851,7 @@ let state = {
             }
             document.getElementById('dailyEmpty').classList.add('hidden');
 
+            // Render Rows
             dailyList.forEach(exp => {
                 const catObj = state.categories.find(c => c.id === exp.category) || { name: 'Others', icon: '📦' };
                 const dateObj = new Date(exp.date);
@@ -836,30 +860,43 @@ let state = {
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors';
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-slate-400 dark:text-slate-500 text-xs">${formattedDate}</td>
-                    <td class="px-6 py-4">
-                        <p class="font-extrabold text-slate-850 dark:text-slate-200 leading-tight">${exp.title}</p>
-                        ${exp.notes ? `<p class="text-[11px] text-slate-400 font-medium mt-1 italic">${exp.notes}</p>` : ''}
+                    <td class="px-2 py-3 sm:px-6 sm:py-4 font-bold text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs">${formattedDate}</td>
+                    <td class="px-2 py-3 sm:px-6 sm:py-4">
+                        <p class="font-extrabold text-slate-850 dark:text-slate-200 leading-tight text-xs sm:text-sm">${exp.title}</p>
+                        ${exp.notes ? `<p class="text-[9px] sm:text-[11px] text-slate-400 font-medium mt-1 italic">${exp.notes}</p>` : ''}
                     </td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold border border-indigo-100/20">
-                            <span>${catObj.icon}</span> ${catObj.name}
+                    <td class="px-2 py-3 sm:px-6 sm:py-4">
+                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-3 sm:py-1 bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] sm:text-xs font-bold border border-indigo-100/20">
+                            <span>${catObj.icon}</span> <span class="hidden xs:inline">${catObj.name}</span>
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-right font-black text-slate-900 dark:text-white">₹${exp.amount.toLocaleString('en-IN')}</td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-1.5">
-                            <button onclick="window.editDailyExpense('${exp.id}')" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-xl transition-all" title="Edit">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    <td class="px-2 py-3 sm:px-6 sm:py-4 text-right font-black text-slate-900 dark:text-white text-xs sm:text-sm">₹${exp.amount.toLocaleString('en-IN')}</td>
+                    <td class="px-2 py-3 sm:px-6 sm:py-4 text-right">
+                        <div class="flex items-center justify-end gap-1 sm:gap-1.5">
+                            <button onclick="window.editDailyExpense('${exp.id}')" class="p-1 sm:p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-xl transition-all" title="Edit">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                             </button>
-                            <button onclick="window.deleteDailyExpense('${exp.id}')" class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-all" title="Delete">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <button onclick="window.deleteDailyExpense('${exp.id}')" class="p-1 sm:p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-all" title="Delete">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                             </button>
                         </div>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
+
+            // Calculate & Append Total Summary Row
+            const totalDailySum = dailyList.reduce((sum, exp) => sum + exp.amount, 0);
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'bg-slate-100/50 dark:bg-slate-800/40 font-bold border-t border-slate-200 dark:border-slate-700';
+            totalRow.innerHTML = `
+                <td class="px-2 py-3 sm:px-6 sm:py-4 text-xs sm:text-sm font-black text-slate-850 dark:text-slate-200" colspan="2">Total Daily Expenses</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4"></td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 text-right font-black text-slate-900 dark:text-white text-xs sm:text-sm">₹${totalDailySum.toLocaleString('en-IN')}</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4"></td>
+            `;
+            tbody.appendChild(totalRow);
+
             lucide.createIcons();
         }
 
@@ -874,6 +911,7 @@ let state = {
             }
             document.getElementById('udhaarEmpty').classList.add('hidden');
 
+            // Render Rows
             loanList.forEach(loan => {
                 const dateObj = new Date(loan.date);
                 const formattedDate = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -882,31 +920,43 @@ let state = {
                 const crossedStyle = loan.settled ? 'line-through text-slate-400 dark:text-slate-500 opacity-50' : '';
 
                 const statusBadge = loan.settled 
-                    ? `<button onclick="window.toggleUdhaarStatus('${loan.id}')" class="px-3 py-1.5 text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl transition-all flex items-center gap-1.5 border border-emerald-500/20" title="Click to Mark Pending">
-                        <i data-lucide="check-square" class="w-4 h-4"></i> Paid (Returned)
+                    ? `<button onclick="window.toggleUdhaarStatus('${loan.id}')" class="px-1.5 py-0.5 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl transition-all flex items-center gap-1 border border-emerald-500/20" title="Click to Mark Pending">
+                        <i data-lucide="check-square" class="w-3 h-3 sm:w-4 sm:h-4"></i> Paid
                        </button>` 
-                    : `<button onclick="window.toggleUdhaarStatus('${loan.id}')" class="px-3 py-1.5 text-xs font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-500 dark:text-rose-400 rounded-xl transition-all flex items-center gap-1.5 border border-rose-500/20" title="Click to Mark Paid">
-                        <i data-lucide="square" class="w-4 h-4"></i> Unpaid (Pending)
+                    : `<button onclick="window.toggleUdhaarStatus('${loan.id}')" class="px-1.5 py-0.5 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-500 dark:text-rose-400 rounded-xl transition-all flex items-center gap-1 border border-rose-500/20" title="Click to Mark Paid">
+                        <i data-lucide="square" class="w-3 h-3 sm:w-4 sm:h-4"></i> Unpaid
                        </button>`;
 
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors';
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-slate-400 dark:text-slate-500 text-xs">${formattedDate}</td>
-                    <td class="px-6 py-4">
-                        <p class="font-extrabold text-slate-850 dark:text-slate-200 leading-tight ${crossedStyle}">${loan.person}</p>
-                        ${loan.notes ? `<p class="text-[11px] text-slate-400 font-medium mt-1 italic ${crossedStyle}">${loan.notes}</p>` : ''}
+                    <td class="px-2 py-3 sm:px-6 sm:py-4 font-bold text-slate-400 dark:text-slate-500 text-[10px] sm:text-xs">${formattedDate}</td>
+                    <td class="px-2 py-3 sm:px-6 sm:py-4">
+                        <p class="font-extrabold text-slate-850 dark:text-slate-200 leading-tight text-xs sm:text-sm ${crossedStyle}">${loan.person}</p>
+                        ${loan.notes ? `<p class="text-[9px] sm:text-[11px] text-slate-400 font-medium mt-1 italic ${crossedStyle}">${loan.notes}</p>` : ''}
                     </td>
-                    <td class="px-6 py-4 font-black text-slate-900 dark:text-white ${crossedStyle}">₹${loan.amount.toLocaleString('en-IN')}</td>
-                    <td class="px-6 py-4">${statusBadge}</td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="window.deleteUdhaar('${loan.id}')" class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-all" title="Delete">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <td class="px-2 py-3 sm:px-6 sm:py-4 font-black text-slate-900 dark:text-white text-xs sm:text-sm ${crossedStyle}">₹${loan.amount.toLocaleString('en-IN')}</td>
+                    <td class="px-2 py-3 sm:px-6 sm:py-4">${statusBadge}</td>
+                    <td class="px-2 py-3 sm:px-6 sm:py-4 text-right">
+                        <button onclick="window.deleteUdhaar('${loan.id}')" class="p-1 sm:p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-all" title="Delete">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                         </button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
+
+            // Calculate & Append Total Summary Row
+            const totalUdhaarSum = loanList.reduce((sum, loan) => sum + loan.amount, 0);
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'bg-slate-100/50 dark:bg-slate-800/40 font-bold border-t border-slate-200 dark:border-slate-700';
+            totalRow.innerHTML = `
+                <td class="px-2 py-3 sm:px-6 sm:py-4 text-xs sm:text-sm font-black text-slate-850 dark:text-slate-200" colspan="2">Total Money Lent (Udhaar)</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4 font-black text-slate-900 dark:text-white text-xs sm:text-sm">₹${totalUdhaarSum.toLocaleString('en-IN')}</td>
+                <td class="px-2 py-3 sm:px-6 sm:py-4" colspan="2"></td>
+            `;
+            tbody.appendChild(totalRow);
+
             lucide.createIcons();
         }
 

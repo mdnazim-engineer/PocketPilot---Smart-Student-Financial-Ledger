@@ -318,14 +318,14 @@
                         </form>
                     </div>
 
-                    <!-- Form 4: Udhaar Tracker (Money Lent) -->
+                    <!-- Form 4: Udhaar Tracker (Money Lent Tracker) -->
                     <div id="udhaar-section" class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium">
                         <div class="flex items-center gap-3.5 mb-5">
                             <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                                 <i data-lucide="handshake" class="w-5 h-5"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Udhaar Tracker - Money Lent Tracker</h3>
+                                <h3 class="text-lg font-bold text-slate-800 dark:text-white">Money Lent Tracker</h3>
                                 <p class="text-xs text-slate-400">Kisi dost ko diye huye udhaar paise ka record rakhein.</p>
                             </div>
                         </div>
@@ -427,7 +427,6 @@
                     <!-- Right: List legend with category percentage share and total spent on it -->
                     <div class="md:col-span-7 space-y-4">
                         <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">CATEGORY SHARE LIST</h4>
-                        <p class="text-xs text-slate-400 italic">Kharchon ki circular report yahan generate hogi.</p>
                         <div id="analyticsLegendGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2">
                             <!-- Injected dynamically with category progress panels -->
                         </div>
@@ -447,20 +446,20 @@
                         </h4>
                     </div>
                     <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <table class="w-full text-left border-collapse whitespace-normal sm:whitespace-nowrap">
                             <thead>
-                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
-                                    <th class="px-6 py-4">Source</th>
-                                    <th class="px-6 py-4 text-right">Amount</th>
-                                    <th class="px-6 py-4 text-right">Action</th>
+                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Source</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4 text-right">Amount</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="incomeTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                            <tbody id="incomeTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs sm:text-sm">
                                 <!-- JS Injects -->
                             </tbody>
                         </table>
                     </div>
-                    <div id="incomeEmpty" class="hidden p-8 text-center text-slate-400">No income entries found.</div>
+                    <div id="incomeEmpty" class="hidden p-8 text-center text-slate-400 text-xs">No income entries found.</div>
                 </div>
 
                 <!-- 2. Fixed Bills Status History -->
@@ -472,23 +471,23 @@
                         </h4>
                     </div>
                     <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <table class="w-full text-left border-collapse whitespace-normal sm:whitespace-nowrap">
                             <thead>
-                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
-                                    <th class="px-6 py-4">Month</th>
-                                    <th class="px-6 py-4">Rent</th>
-                                    <th class="px-6 py-4">Electricity</th>
-                                    <th class="px-6 py-4">Net / Wi-Fi</th>
-                                    <th class="px-6 py-4">Other Bill</th>
-                                    <th class="px-6 py-4 text-right">Total Fixed</th>
+                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Month</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Rent</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Electricity</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Net / Wi-Fi</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Other Bill</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4 text-right">Total Fixed</th>
                                 </tr>
                             </thead>
-                            <tbody id="fixedTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                            <tbody id="fixedTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs sm:text-sm">
                                 <!-- JS Injects -->
                             </tbody>
                         </table>
                     </div>
-                    <div id="fixedEmpty" class="hidden p-8 text-center text-slate-400">No fixed bill entries logged.</div>
+                    <div id="fixedEmpty" class="hidden p-8 text-center text-slate-400 text-xs">No fixed bill entries logged.</div>
                 </div>
 
                 <!-- 3. Daily Expenses History Ledger -->
@@ -500,49 +499,49 @@
                         </h4>
                     </div>
                     <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <table class="w-full text-left border-collapse whitespace-normal sm:whitespace-nowrap">
                             <thead>
-                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
-                                    <th class="px-6 py-4">Date</th>
-                                    <th class="px-6 py-4">Details</th>
-                                    <th class="px-6 py-4">Category</th>
-                                    <th class="px-6 py-4 text-right">Amount</th>
-                                    <th class="px-6 py-4 text-right">Action</th>
+                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Date</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Details</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Category</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4 text-right">Amount</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="dailyTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                            <tbody id="dailyTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs sm:text-sm">
                                 <!-- JS Injects -->
                             </tbody>
                         </table>
                     </div>
-                    <div id="dailyEmpty" class="hidden p-8 text-center text-slate-400">No daily expense logs found.</div>
+                    <div id="dailyEmpty" class="hidden p-8 text-center text-slate-400 text-xs">No daily expense logs found.</div>
                 </div>
 
-                <!-- NEW 4. Udhaar History Ledger (Money Lent) -->
+                <!-- 4. Money Lent History (Udhaar Ledger) -->
                 <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium overflow-hidden">
                     <div class="p-6 border-b border-slate-100 dark:border-slate-800">
                         <h4 class="text-base font-bold text-slate-850 dark:text-white flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-amber-55 bg-amber-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
                             Money Lent History (Udhaar Ledger)
                         </h4>
                     </div>
                     <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <table class="w-full text-left border-collapse whitespace-normal sm:whitespace-nowrap">
                             <thead>
-                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
-                                    <th class="px-6 py-4">Date</th>
-                                    <th class="px-6 py-4">Friend Name / Purpose</th>
-                                    <th class="px-6 py-4">Amount</th>
-                                    <th class="px-6 py-4">Status</th>
-                                    <th class="px-6 py-4 text-right">Action</th>
+                                <tr class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Date</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Friend Name / Purpose</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Amount</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4">Status</th>
+                                    <th class="px-2 py-3 sm:px-6 sm:py-4 text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="udhaarTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                            <tbody id="udhaarTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs sm:text-sm">
                                 <!-- JS Injects -->
                             </tbody>
                         </table>
                     </div>
-                    <div id="udhaarEmpty" class="hidden p-8 text-center text-slate-400">No udhaar records found.</div>
+                    <div id="udhaarEmpty" class="hidden p-8 text-center text-slate-400 text-xs">No udhaar records found.</div>
                 </div>
 
             </section>
